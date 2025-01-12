@@ -1,17 +1,18 @@
 from utils.user import User
 from utils.bot import WordBot as wb
 from telethon.sync import events
-import asyncio, re
+import asyncio, re, string
 
 # Initialize global variables
 user = User()
 bot = wb()
 bot.importWords()
 config = {
-    "delay": 0,
+    "delay": 2,
     "playingGroup": None,
-    "user": None,
+    "user": {},
     "spam": "",
+    "contains": "",
     "bannedLetters": [],
     "user-prompts": [
         "/time", 
@@ -27,7 +28,6 @@ config = {
     ],
     "game-prompts": [
         "The first word",
-        "Banned letters:",
         "is accepted"
     ]
 }
@@ -75,29 +75,40 @@ async def handler(event):
         elif event.chat_id == config["playingGroup"]:
             if any(prompt in event.raw_text for prompt in config["game-prompts"]):
                 msg = event.raw_text.split()
-                try:
-                    max = msg.index("Turn")
-                    modify = " ".join(msg[:max])
-                    letters = " ".join(msg[7:max]).replace(",", "").split()
 
-                    if modify.startswith("The first word"):
-                        removedWord = msg[4].rstrip(".").lower()
-                        bot.removeWord(removedWord)
+                if config["game-prompts"][0] in event.raw_text:
+                    firstWord = msg[4].rstrip(".").lower()
+                    bot.removeWord(firstWord)
 
-                        # Handles banned letter game
-                        config["bannedLetters"].extend([char for char in letters if any(char)])
-                        print(config["bannedLetters"])
-                except ValueError:
-                    modify = " ".join(msg)
+                    # Handles banned letter if the game mode is banned letters
+                    maxlen = msg.index("Turn")
+                    banned_letters = " ".join(msg[7:maxlen]).replace(",", "").split()
+                    config["bannedLetters"].extend(char for char in 
+                                                    banned_letters if any(
+                                                    char))
 
-                    if "is accepted." in modify:
-                        removedWord = msg[0].lower()
-                        bot.removeWord(removedWord)
-                        print("HEllo")
-
+            # Send a word when it is our turn
+            elif config["user"]["turn"] in event.raw_text:
+                for num in [3, 4, 5, 6, 7, 8, 9, 10]:
+                    if f"at least {num}" in event.raw_text:
+                        bot.filterDict(limit=num)
+                        break
+                for char in string.ascii_uppercase:
+                    if f"Your word must start with {char}" in event.raw_text:
+                        for letter in string.ascii_uppercase:
+                            if f"include {letter}" in event.raw_text:
+                                config["contains"] = letter.lower()
+                                break
+                        
+                        async with user.client.action(entity=event.chat_id,
+                                                        action="typing",):
+                            await asyncio.sleep(config["delay"])
+                            await user.client.send_message(entity=event.chat_id,
+                                                            message=bot.getWord(prefix=char.lower(),
+                                                                                suffix=config["spam"],
+                                                                                contains=config["contains"],
+                                                                                banned=config["bannedLetters"]))
+                                                    
 if __name__ == "__main__":
     print("Bot Started!")
     asyncio.run(main())
-
-
-
