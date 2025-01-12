@@ -24,8 +24,9 @@ class WordBot:
         the words' length should be 3 or more
         """
         
-        for word in self.dictionary:
-            self.dictionary.remove(word) if len(word) < limit else None
+        self.dictionary = [
+            word for word in self.dictionary if len(word) >= limit
+            ]
 
     def removeWord(self, word: str) -> None:
         """
@@ -63,13 +64,17 @@ class WordBot:
             str: A list of words that meet the specified criteria.
         """
 
-        subDictionary = []
+        """subDictionary = [word for word in self.dictionary if word.startswith(prefix) \
+                 and word.endswith(suffix) and contains in word \
+                 and not any(letter in word for letter in banned)]"""
 
-        for WORD in self.dictionary:
-            match = re.search(rf"^{prefix}+.*{suffix}$", WORD)
-            if match:
-                word = match.string
-                subDictionary.append(word) if contains in word \
-                    and not any(letter in word for letter in banned) else None
-
-        return random.choice(subDictionary)
+        subDictionary = [
+            word for word in self.dictionary if word.startswith(prefix) 
+            and word.__contains__(contains) and not any(letter in word for letter in banned)
+            and word.endswith(suffix)
+            ]
+                    
+        return random.choice(subDictionary) if subDictionary else self.getWord(prefix=prefix,
+                                                                               suffix="",
+                                                                               contains=contains,
+                                                                               banned=banned)
