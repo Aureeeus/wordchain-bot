@@ -1,0 +1,6 @@
+# Main Library
+Telethon (latest version if applicable)
+
+# Sub Libraries
+Asyncio (python asyncio library)
+Re (python regex library)
