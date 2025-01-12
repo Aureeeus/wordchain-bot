@@ -1,4 +1,4 @@
-import re, random, time
+import re, random
 
 class WordBot:
     def __init__(self):
@@ -47,14 +47,14 @@ class WordBot:
 
     def getWord(self,
                 prefix: str,
-                suffix: str,
+                suffix: str = "",
                 contains: str = "", 
                 banned: list = []) -> str:
         """
         Filters a list of words based on given criteria.
 
         Args:
-            prefix (str, optional): Words must start with this prefix. Defaults to "".
+            prefix (str, required): Words must start with this prefix. Defaults to "".
             suffix (str, optional): Words must end with this suffix. Defaults to "".
             contains (str, optional): Words must contain these characters. Defaults to "".
             banned (list, optional): Words must not contain any of these characters. Defaults to [].
@@ -69,7 +69,7 @@ class WordBot:
             match = re.search(rf"^{prefix}+.*{suffix}$", WORD)
             if match:
                 word = match.string
-                subDictionary.append(word) if contains in word and not any(
-                    letter in word for letter in banned) else None
+                subDictionary.append(word) if contains in word \
+                    and not any(letter in word for letter in banned) else None
 
         return random.choice(subDictionary)
