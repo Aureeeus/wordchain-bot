@@ -28,7 +28,7 @@ config = {
     ],
     "game-prompts": [
         "The first word",
-        "is accepted"
+        "is accepted."
     ]
 }
 
@@ -63,7 +63,7 @@ async def handler(event):
                 case "/time":
                     updateConfig(delay=int(msg[1]))
                 case "/spam":
-                    updateConfig(spam=msg[1])
+                    updateConfig(spam=msg[1].lower())
                 case _:
                     updateConfig(playingGroup=event.chat_id)
             await user.client.delete_messages(entity=event.chat_id, 
@@ -78,14 +78,18 @@ async def handler(event):
 
                 if config["game-prompts"][0] in event.raw_text:
                     firstWord = msg[4].rstrip(".").lower()
-                    bot.removeWord(firstWord)
+                    bot.removeWord(word=firstWord)
 
                     # Handles banned letter if the game mode is banned letters
                     maxlen = msg.index("Turn")
                     banned_letters = " ".join(msg[7:maxlen]).replace(",", "").split()
-                    config["bannedLetters"].extend(char for char in 
+                    config["bannedLetters"].extend(char.lower() for char in 
                                                     banned_letters if any(
                                                     char))
+                    
+                elif config["game-prompts"][1] in event.raw_text:
+                    word = msg[0].lower()
+                    bot.removeWord(word=word)
 
             # Send a word when it is our turn
             elif config["user"]["turn"] in event.raw_text:
