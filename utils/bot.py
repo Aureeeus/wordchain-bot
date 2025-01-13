@@ -1,4 +1,4 @@
-import re, random
+import random
 
 class WordBot:
     def __init__(self):
@@ -15,6 +15,7 @@ class WordBot:
         """
 
         with open('database/words.txt', 'r') as file:
+            self.dictionary.clear()
             for word in file:
                 self.dictionary.append(word.strip().lower()) if len(word) > 2 else None
     
@@ -64,16 +65,12 @@ class WordBot:
             str: A list of words that meet the specified criteria.
         """
 
-        """subDictionary = [word for word in self.dictionary if word.startswith(prefix) \
-                 and word.endswith(suffix) and contains in word \
-                 and not any(letter in word for letter in banned)]"""
-
         subDictionary = [
             word for word in self.dictionary if word.startswith(prefix) 
             and word.__contains__(contains) and not any(letter in word for letter in banned)
             and word.endswith(suffix)
             ]
-                    
+        
         return random.choice(subDictionary) if subDictionary else self.getWord(prefix=prefix,
                                                                                suffix="",
                                                                                contains=contains,
