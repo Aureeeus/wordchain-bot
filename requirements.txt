@@ -3,4 +3,8 @@ telethon (latest version if applicable)
 
 # Sub Libraries
 asyncio (python asyncio library)
-re (python regex library)
+time (python time library)
+json (python json library)
+random(python random library)
+
+-Create your own venv
