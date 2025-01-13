@@ -1,7 +1,7 @@
 from utils.user import User
 from utils.bot import WordBot as wb
 from telethon.sync import events
-import asyncio, re, string
+import asyncio, string
 
 # Initialize global variables
 user = User()
@@ -28,7 +28,9 @@ config = {
     ],
     "game-prompts": [
         "The first word",
-        "is accepted."
+        "is accepted.",
+        "won the game",
+        "Total words:"
     ]
 }
 
@@ -42,10 +44,18 @@ def updateConfig(**kwargs: dict) -> None:
     Returns:
         None
     """
+
     for key, value in kwargs.items():
         config[key] = value
          
-async def main():
+async def main() -> None:
+    """
+    Main function, this is required to run the bot.
+
+    Returns:
+        None
+    """
+
     config["user"] = await user.fetchInfo(user.client)
     # The number that starts with "840338206" is the wordchain bot's id
     config.update({"players": [config["user"]["id"], 840338206]})
@@ -54,17 +64,27 @@ async def main():
     await user.client.run_until_disconnected()
 
 @user.client.on(events.NewMessage)
-async def handler(event):
+async def handler(event) -> None:
+    """
+    Telegram messages handler.
+
+    Args:
+        event(object, required): Interacts with new messages.
+    
+    Returns:
+        None
+    """
+
     if event.sender_id in config["players"]:
         # Handling prompts by user
         if any(event.raw_text.startswith(prompt) for prompt in config["user-prompts"]):
             msg = event.raw_text.split()
             match msg[0]:
-                case "/time":
+                case "/time": # Change the delay of bot sending the word, which 2 is default
                     updateConfig(delay=int(msg[1]))
-                case "/spam":
+                case "/spam": # Spams a letter that ends with your intended suffix
                     updateConfig(spam=msg[1].lower())
-                case _:
+                case _: # Sets the group chat where the user joins a game
                     updateConfig(playingGroup=event.chat_id)
             await user.client.delete_messages(entity=event.chat_id, 
                                               message_ids=event.id) \
@@ -76,6 +96,7 @@ async def handler(event):
             if any(prompt in event.raw_text for prompt in config["game-prompts"]):
                 msg = event.raw_text.split()
 
+                # Removes the word at the beginning of the game
                 if config["game-prompts"][0] in event.raw_text:
                     firstWord = msg[4].rstrip(".").lower()
                     bot.removeWord(word=firstWord)
@@ -86,10 +107,19 @@ async def handler(event):
                     config["bannedLetters"].extend(char.lower() for char in 
                                                     banned_letters if any(
                                                     char))
-                    
+                
+                # Removes the word that is accepted by the game
                 elif config["game-prompts"][1] in event.raw_text:
                     word = msg[0].lower()
                     bot.removeWord(word=word)
+
+                # Restart bot when game ends and its config
+                elif config["game-prompts"][2] in event.raw_text \
+                and config["game-prompts"][3] in event.raw_text:
+                    bot.importWords()
+                    config["spam"] = ""
+                    config["contains"] = ""
+                    config["bannedLetters"] = []
 
             # Send a word when it is our turn
             elif config["user"]["turn"] in event.raw_text:
