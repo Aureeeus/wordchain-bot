@@ -11,7 +11,7 @@ class WordBot:
     
     def importWords(self) -> None:
         """
-        Import words to the bot's dictionary
+        Import words to the bot's dictionary.
         """
 
         with open('database/words.txt', 'r') as file:
@@ -22,7 +22,7 @@ class WordBot:
     def filterDict(self, limit: int = 3) -> None:
         """
         Filters the bot's dictionary, 
-        the words' length should be 3 or more
+        the words' length should be 3 or more.
         """
         
         self.dictionary = [
@@ -56,7 +56,7 @@ class WordBot:
         Filters a list of words based on given criteria.
 
         Args:
-            prefix (str, required): Words must start with this prefix. Defaults to "".
+            prefix (str, required): Words must start with this prefix.
             suffix (str, optional): Words must end with this suffix. Defaults to "".
             contains (str, optional): Words must contain these characters. Defaults to "".
             banned (list, optional): Words must not contain any of these characters. Defaults to [].
