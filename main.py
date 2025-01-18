@@ -136,12 +136,15 @@ async def handler(event) -> None:
                         
                         async with user.client.action(entity=event.chat_id,
                                                         action="typing",):
+
+                            word = bot.getWord(prefix=char.lower(),
+                                               suffix=config["spam"],
+                                               contains=config["contains"],
+                                               banned=config["bannedLetters"])
+                                                            
                             await asyncio.sleep(config["delay"])
                             await user.client.send_message(entity=event.chat_id,
-                                                            message=bot.getWord(prefix=char.lower(),
-                                                                                suffix=config["spam"],
-                                                                                contains=config["contains"],
-                                                                                banned=config["bannedLetters"]))
+                                                            message=word)
                                                     
 if __name__ == "__main__":
     print("Bot Started!")
