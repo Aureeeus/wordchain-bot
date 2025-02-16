@@ -1,6 +1,7 @@
 import json
 from telethon.sync import TelegramClient
 
+
 class User:
     def __init__(self):
         """
@@ -35,8 +36,8 @@ class User:
                 json.dump(dataUpdate, file, indent=4)
             finally:
                 self.client = TelegramClient(session="anon",
-                                            api_hash=self.API_HASH,
-                                            api_id=self.API_ID)
+                                             api_hash=self.API_HASH,
+                                             api_id=self.API_ID)
 
     @staticmethod
     async def fetchInfo(client: TelegramClient) -> dict:
@@ -52,10 +53,10 @@ class User:
         """
 
         async with client:
-            info = {} # Empty for now, will add keys and value to it later
+            info = {}  # Empty for now, will add keys and value to it later
             me = await client.get_me()
 
             info.update({"turn": f"Turn: {me.first_name} {me.last_name}" if me.last_name is not None
-                             else f"Turn: {me.first_name}",
-                    "id": me.id})
+                         else f"Turn: {me.first_name}",
+                         "id": me.id})
             return info
