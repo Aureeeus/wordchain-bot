@@ -120,20 +120,20 @@ async def handler(event):
                                 config["contains"] = letter.lower()
                                 break
 
-                        word_generator = bot.getWord(prefix=char.lower(),
-                                                     suffix=config["spam"],
-                                                     contains=config["contains"],
-                                                     banned=config["bannedLetters"])
+                        # Generates a word according to the conditions of the game.
+                        word = bot.getWord(prefix=char.lower(),
+                                           suffix=config["spam"],
+                                           contains=config["contains"],
+                                           banned=config["bannedLetters"])
 
-                        try:
-                            word = next(word_generator)
-                        except StopIteration as e:
-                            print(e.value)
-
+                        # Sends a message to the playing group with a typing animation.
                         async with user.client.action(entity=event.chat_id, action="typing",):
-
-                            await asyncio.sleep(config["delay"])
-                            await user.client.send_message(entity=event.chat_id, message=word)
+                            try:
+                                assert word, "No word found, you lost the game :("
+                                await asyncio.sleep(config["delay"])
+                                await user.client.send_message(entity=event.chat_id, message=word)
+                            except AssertionError as e:
+                                print(e)
 
 if __name__ == "__main__":
     print("Bot Started!")
