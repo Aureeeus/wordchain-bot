@@ -1,5 +1,4 @@
 import random
-from typing import Generator
 
 
 class WordBot:
@@ -54,7 +53,7 @@ class WordBot:
                 prefix: str,
                 suffix: str = "",
                 contains: str = "",
-                banned: list = []) -> Generator[str, None, str]:
+                banned: list = []) -> str:
         """
         Filters a list of words based on given criteria hence
         generating a word when there's a match.
@@ -65,37 +64,24 @@ class WordBot:
             contains (str, optional): Words must contain these characters. Defaults to "".
             banned (list, optional): Words must not contain any of these characters. Defaults to [].
 
-        Yields:
-            str: A random word that meets the specified criteria.
-
         Returns:
-            str: A message raises when no words is matched.
+            str: A random word that meets the specified criteria.
         """
 
         subDictionary = [
             word for word in self.dictionary if word.startswith(prefix)
-            and word.__contains__(contains)
+            and contains in word
             and not any(letter in word for letter in banned)
             and word.endswith(suffix)
         ]
+        if subDictionary:
+            return random.choice(subDictionary)
 
-        while True:
-            # If subdictionary is empty, generate a new words that do not ends with a spam.
-            if not subDictionary:
-                subDictionary = [
-                    word for word in self.dictionary if word.startswith(prefix)
-                    and word.__contains__(contains)
-                    and not any(letter in word for letter in banned)
-                    and word.endswith("")
-                ]
-
-                # Breaks inside the loop if the last dictionary is empty.
-                if not subDictionary:
-                    break
-
-                yield random.choice(subDictionary)
-            else:
-                yield random.choice(subDictionary)
-
-        # Error message if no value was yielded.
-        return "No word was found!"
+        # IF no value was found, create a new list of words that
+        # ends with nothing, meaning "no spam".
+        subDictionary = [
+            word for word in self.dictionary if word.startswith(prefix)
+            and contains in word
+            and not any(letter in word for letter in banned)
+        ]
+        return random.choice(subDictionary) if subDictionary else None
